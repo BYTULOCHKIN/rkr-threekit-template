@@ -1,6 +1,13 @@
 {
     "extends": ["stylelint-config-standard"],
-    "ignoreFiles": ["**/dist/**", "**/node_modules/**", "**/tmp/**", "**/coverage/**", "**/storybook-static/**"],
+    "ignoreFiles": [
+        "**/dist/**",
+        "**/dist-embed/**",
+        "**/node_modules/**",
+        "**/tmp/**",
+        "**/coverage/**",
+        "**/storybook-static/**"
+    ],
     "rules": {
         "no-descending-specificity": null,
         "at-rule-no-unknown": null,
