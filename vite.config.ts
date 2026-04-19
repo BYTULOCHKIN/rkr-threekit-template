@@ -44,12 +44,16 @@ export default defineConfig({
               lib: {
                   entry: fileURLToPath(new URL('./src/embed.tsx', import.meta.url)),
                   name: 'ThreekitConfigurator',
-                  fileName: () => 'threekit-embed.js',
+                  fileName: () => {
+                      return 'threekit-embed.js';
+                  },
                   formats: ['iife'],
               },
               outDir: 'dist-embed',
               target: ['es2022', 'edge100', 'firefox100', 'chrome100', 'safari15.4', 'opera90'],
-              assetsInlineLimit: () => true,
+              assetsInlineLimit: () => {
+                  return true;
+              },
           }
         : {
               outDir: 'dist',

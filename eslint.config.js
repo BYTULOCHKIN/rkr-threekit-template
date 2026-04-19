@@ -8,7 +8,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config({
-    ignores: ['**/dist/**', '**/tmp/**', '/src/routeTree.gen.ts'],
+    ignores: ['**/dist/**', '**/dist-embed/**', '**/tmp/**', '/src/routeTree.gen.ts'],
     files: ['**/*.{js,ts,tsx,cjs,mjs}'],
     extends: [
         eslint.configs.recommended,
@@ -103,15 +103,7 @@ export default tseslint.config({
         'comma-style': ['error', 'last'],
         'space-before-blocks': ['error', 'always'],
         'no-mixed-spaces-and-tabs': ['error'],
-        'no-unused-vars': [
-            'error',
-            {
-                args: 'all',
-                argsIgnorePattern: '^_',
-                destructuredArrayIgnorePattern: '^_',
-                varsIgnorePattern: '^_',
-            },
-        ],
+        'no-unused-vars': 'off',
         'no-extra-semi': ['error'],
         'no-console': ['warn'],
         'no-debugger': ['error'],

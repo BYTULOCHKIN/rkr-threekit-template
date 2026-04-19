@@ -23,13 +23,13 @@ export const Player = (props: { children?: React.ReactNode }) => {
                 hasMoved.current = false;
             }
         };
-    }, [portalPlayerTo, hasLoaded]);
+    }, [portalPlayerTo, hasLoaded, portalBack]);
 
     useEffect(() => {
         if (hasLoaded) {
             init();
         }
-    }, [hasLoaded]);
+    }, [hasLoaded, init]);
 
     return (
         <div className={s.playerWrapper}>

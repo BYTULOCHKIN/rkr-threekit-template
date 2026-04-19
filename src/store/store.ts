@@ -16,25 +16,38 @@ interface ConfiguratorState {
 export const useConfiguratorStore = create<ConfiguratorState>()(
     devtools(
         temporal(
-            (set) => ({
-                attributes: [],
-                isProcessing: false,
-                isLoaded: false,
+            (set) => {
+                return {
+                    attributes: [],
+                    isProcessing: false,
+                    isLoaded: false,
 
-                setAttribute: (name, value) =>
-                    set((state) => ({
-                        attributes: state.attributes.map((attr) =>
-                            attr.name === name ? { ...attr, value: value as never } : attr
-                        ),
-                    })),
+                    setAttribute: (name, value) => {
+                        return set((state) => {
+                            return {
+                                attributes: state.attributes.map((attr) => {
+                                    return attr.name === name ? { ...attr, value: value as never } : attr;
+                                }),
+                            };
+                        });
+                    },
 
-                setAttributes: (attributes) => set({ attributes }),
-                setProcessing: (value) => set({ isProcessing: value }),
-                setLoaded: (value) => set({ isLoaded: value }),
-            }),
+                    setAttributes: (attributes) => {
+                        return set({ attributes });
+                    },
+                    setProcessing: (value) => {
+                        return set({ isProcessing: value });
+                    },
+                    setLoaded: (value) => {
+                        return set({ isLoaded: value });
+                    },
+                };
+            },
             {
                 limit: 50,
-                partialize: (state) => ({ attributes: state.attributes }),
+                partialize: (state) => {
+                    return { attributes: state.attributes };
+                },
             }
         ),
         { name: 'ConfiguratorStore' } // 4. Название стора для Redux DevTools

@@ -10,12 +10,12 @@ export const PlayerWidgets: React.FC = () => {
     const { isLoaded } = usePlayerStatus();
 
     if (!isLoaded) return null;
-    return (
-        <>
-            {/* <TopLeftWidget />
-            <BottomLeftWidgets />
-            <BottomCenterWidgets />
-            <BottomRightWidgets /> */}
-        </>
-    );
+    // return (
+    //     <>
+    //         <TopLeftWidget />
+    //         <BottomLeftWidgets />
+    //         <BottomCenterWidgets />
+    //         <BottomRightWidgets />
+    //     </>
+    // );
 };

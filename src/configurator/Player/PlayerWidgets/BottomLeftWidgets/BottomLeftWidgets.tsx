@@ -25,7 +25,9 @@ export const BottomLeftWidgets = () => {
         };
 
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            return window.removeEventListener('keydown', handleKeyDown);
+        };
     }, [undo, redo]);
 
     return (

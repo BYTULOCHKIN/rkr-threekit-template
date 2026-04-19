@@ -19,14 +19,14 @@ export const Form = () => {
             {isProcessing && <div className={s.processing} />}
 
             <ul className={s.attributeList}>
-                {attributes.map((attribute, idx) => (
-                    <li key={idx} className={s.attributeItem}>
-                        <span className={s.attributeName}>{attribute.name}</span>
-                        <span className={s.attributeValue}>
-                            {JSON.stringify((attribute as any)?.value ?? attribute)}
-                        </span>
-                    </li>
-                ))}
+                {attributes.map((attribute, idx) => {
+                    return (
+                        <li key={idx} className={s.attributeItem}>
+                            <span className={s.attributeName}>{attribute.name}</span>
+                            <span className={s.attributeValue}>{JSON.stringify(attribute?.value ?? attribute)}</span>
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );

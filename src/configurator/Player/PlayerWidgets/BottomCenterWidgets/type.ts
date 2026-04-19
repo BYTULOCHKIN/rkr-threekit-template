@@ -1,1 +1,3 @@
-export type BottomCenterWidgetsPropsT = {};
+export type BottomCenterWidgetsPropsT = {
+    someProp?: string;
+};

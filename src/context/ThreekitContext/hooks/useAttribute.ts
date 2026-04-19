@@ -1,5 +1,9 @@
 import { useConfiguratorStore } from '@/store/store';
 
 export const useAttribute = (name: string) => {
-    return useConfiguratorStore((state) => state.attributes.find((attr) => attr.name === name));
+    return useConfiguratorStore((state) => {
+        return state.attributes.find((attr) => {
+            return attr.name === name;
+        });
+    });
 };
