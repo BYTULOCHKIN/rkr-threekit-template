@@ -1,22 +1,23 @@
-# React-TS Project template
+# Threekit Configurator Template
 
 > by rkr (Ruslan Krasiuk)
 
-This project was bootstrapped with [Vite.js](https://vitejs.dev).
+A Vite-based React + TypeScript template for building Threekit product configurators as embeddable widgets.
 
 ---
 
 Table of contents:
 
-- [React-TS Project template](#react-ts-project-template)
+- [Threekit Configurator Template](#threekit-configurator-template)
     - [📦 Stack](#-stack)
     - [🚀 Quick start](#-quick-start)
     - [🤖 Commands](#-commands)
     - [🧶 Structure](#-structure)
         - [Core application structure](#core-application-structure)
-        - [Routing \& navigation](#routing--navigation)
-        - [Services \& API layer](#services--api-layer)
-        - [Application configuration \& utilities](#application-configuration--utilities)
+        - [Configurator](#configurator)
+        - [Threekit Context](#threekit-context)
+        - [Services & API layer](#services--api-layer)
+        - [Application configuration & utilities](#application-configuration--utilities)
         - [Global application files](#global-application-files)
             - [Build and output directories](#build-and-output-directories)
             - [Configuration files](#configuration-files)
@@ -26,6 +27,7 @@ Table of contents:
         - [Icons](#icons)
         - [Contexts](#contexts)
         - [Hooks](#hooks)
+            - [Threekit hooks](#threekit-hooks)
             - [Query hooks](#query-hooks)
                 - [Query Keys](#query-keys)
             - [Mutation hooks](#mutation-hooks)
@@ -33,16 +35,16 @@ Table of contents:
         - [Constants](#constants)
             - [Schemas](#schemas)
         - [Styles](#styles)
-            - [Anatomy](#anatomy)
-        - [Modules](#modules)
-            - [Submodules](#submodules)
-        - [Routing](#routing)
-            - [`__root.tsx` file](#__roottsx-file)
-            - [File-based routing](#file-based-routing)
-            - [Mixing route types](#mixing-route-types)
-            - [Layouts](#layouts)
-            - [Route API hooks](#route-api-hooks)
     - [✳️ Icons Usage](#️-icons-usage)
+    - [🎮 Threekit Integration](#-threekit-integration)
+        - [How it works](#how-it-works)
+        - [Initialization flow](#initialization-flow)
+        - [Saved configuration](#saved-configuration)
+        - [Reading attributes reactively](#reading-attributes-reactively)
+        - [Setting attributes](#setting-attributes)
+        - [Undo / Redo](#undo--redo)
+    - [🔨 Embed build](#-embed-build)
+        - [Embedding in a client page](#embedding-in-a-client-page)
     - [Getting Started](#getting-started)
 
 ---
@@ -52,9 +54,11 @@ Table of contents:
 - **[Vite](https://vitejs.dev)** - Lightning-fast build tool with HMR;
 - **[React](https://react.dev)** - Core framework with compiler optimizations;
 - **[TypeScript](https://www.typescriptlang.org)** - Type-safe development with strict mode;
-- **[TanStack Router](https://tanstack.com/router/latest)** - Type-safe, file-based routing with code-splitting;
-- **[TanStack Query](https://tanstack.com/query/latest)** - Powerful async state management;
+- **[TanStack Query](https://tanstack.com/query/latest)** - Powerful async state management for REST API calls;
 - **[TanStack Form](https://tanstack.com/form/latest)** - Type-safe form state management;
+- **[Zustand](https://zustand-demo.pmnd.rs)** - Lightweight state management for configurator attributes;
+- **[Zundo](https://github.com/charkour/zundo)** - Undo/redo middleware for Zustand;
+- **[`@threekit-tools/treble`](https://www.npmjs.com/package/@threekit-tools/treble)** - React provider and hooks for Threekit player initialization;
 - **[TailwindCSS](https://tailwindcss.com)** - Utility-first styling;
 - **[Ky](https://github.com/sindresorhus/ky)** - Modern HTTP client;
 - **[Zod](https://zod.dev)** - TypeScript-first schema validation;
@@ -63,19 +67,15 @@ Table of contents:
 ## 🚀 Quick start
 
 1. Install [Node.js](https://nodejs.org);
-    > Require [Node.js](https://nodejs.org) version >=22
+    > Requires [Node.js](https://nodejs.org) version >=22
 2. Install the NPM dependencies by running `npm ci`;
-3. Create `.env.local` then add variables. You can look at the `.env.local.example` file;
+3. Create `.env.local` and add your Threekit credentials. Use `.env.local.example` as a reference;
 
 ## 🤖 Commands
 
-- Runs the local dev server at `localhost:9777`:
+- Runs the local dev server:
     ```
     npm run dev:vite
-    ```
-- Runs the local dev server at `localhost:9777` in the scan mode:
-    ```
-    npm run dev:vite:scan
     ```
 - Runs `tsc` CLI in watch mode:
     ```
@@ -85,15 +85,19 @@ Table of contents:
     ```
     npm run dev
     ```
-- Runs the local dev server in the scan mode and `tsc` together:
+- Runs the local dev server in scan mode and `tsc` together:
     ```
     npm run dev:scan
     ```
-- Builds your production site to `./dist/`:
+- Builds the SPA to `./dist/`:
     ```
     npm run build
     ```
-- Previews your build locally, before deploying at `localhost:9111`:
+- Builds the embed bundle to `./dist-embed/`:
+    ```
+    npm run build:embed
+    ```
+- Previews your build locally:
     ```
     npm run preview
     ```
@@ -121,10 +125,6 @@ Table of contents:
     ```
     npm run fix:prettier
     ```
-- Finds and fixes unused dependencies, exports and files:
-    ```
-    npm run knip
-    ```
 - Installs husky:
     ```
     npm run prepare
@@ -149,112 +149,94 @@ Table of contents:
         - `<ContextName>.tsx` - the context file itself;
     - `components` - the components dir of components (optional). Should consist of like `src/components`;
 
-- `src/components/layouts` - contains layout components for different application layouts. Each layout component should:
-    - have same structure as `src/components` has;
-    - include `<Outlet />` as a child of component;
+- `src/components/ui` - contains basic UI components without business logic like button, input etc.
 
-- `src/components/ui` - contains basic UI components without business logic like button, input etc. Each component should consist of that files:
-    - `index.tsx` - the component file itself;
-    - `styles.module.css` - styles of component file. This file is optional, since we use TailwindCSS;
-    - `types.ts` - types of component file (optional);
-    - `hooks` - contains component hooks dir (optional). Should consist of:
-        - `<hookName>.ts` - the hook file itself;
-    - `constants.ts` - constants of component file (optional);
-    - `schemas.ts` - schemas of component file (optional);
-    - `regexps.ts` - regexps of component file (optional);
-    - `utils` - utils dir of component file (optional). Should consist of:
-        - `<utilName>.ts` - the util file itself;
+### Configurator
 
-- `src/modules` - contains independent features that have their own area of responsibility. These features can fetch data and have complete business logic. Each module should consist of:
-    - `index.tsx` - the component file itself;
-    - `styles.module.css` - styles of component file. This file is optional, since we use TailwindCSS;
-    - `types.ts` - types of component file (optional);
-    - `hooks` - contains component hooks dir (optional). Should consist of:
-        - `<hookName>.ts` - the hook file itself;
-    - `constants.ts` - constants of component file (optional);
-    - `utils` - utils dir of component file (optional). Should consist of:
-        - `<utilName>.ts` - the util file itself;
-    - `schemas.ts` - schemas of component file (optional);
-    - `regexps.ts` - regexps of component file (optional);
-    - `context` - the context dir of component file (optional). Should consist of:
-        - `<ContextName>.tsx` - the context file itself;
-    - `components` - the components dir of components (optional). Should consist of like `src/components`;
+- `src/configurator` - the root of the Threekit configurator UI. Contains the top-level layout and all configurator-specific components:
+    - `index.tsx` - root configurator component, composes `<Player />` and `<Form />`;
+    - `Player/` - wraps the Threekit player div and handles portal mounting via `usePlayerPortal`;
+    - `Form/` - the attribute form UI. Reads attributes reactively from Zustand store and dispatches changes via `useSetAttribute`;
 
-### Routing & navigation
+### Threekit Context
 
-- `src/routes` - application route definitions using Tanstack Router with file-based routing. Should contain `src/modules` and may have other route-specific components. Read more [here](https://tanstack.com/router/latest/docs/framework/react/overview);
+- `src/context/ThreekitContext/` - global context that provides Threekit API methods to the entire app:
+    - `index.tsx` - `ThreekitContextProvider` and `useThreekit` hook;
+    - `types.ts` - `ThreekitContextValue` interface;
+    - `hooks/` - granular hooks built on top of `useThreekit` and Zustand store:
+        - `useAttribute.ts` - reactively reads a single attribute by name from the store;
+        - `useAttributes.ts` - reactively reads all attributes from the store;
+        - `useSetAttribute.ts` - returns the `setAttribute` method;
+        - `useGetTranslation.ts` - returns the `getTranslation` method;
+        - `useGetRotation.ts` - returns the `getRotation` method;
+        - `usePlayerStatus.ts` - returns `{ isLoaded, isProcessing }`;
+        - `useUndoRedo.ts` - returns `{ undo, redo }`;
 
 ### Services & API layer
 
 - `src/services` - contains service layer for API calls and external integrations:
-    - `<serviceName>/` - service directories organized by feature or domain;
-        - `api.ts` - API service file;
-        - `queries.ts` - file with queries and mutations hooks;
-        - `queryKeys.ts` - file with queries and mutations keys;
-        - `types.ts` - types of service file: request and response types;
+    - `threekit/` - Threekit-specific service layer:
+        - `api.ts` - REST API calls to Threekit (e.g. `getSavedConfiguration`);
+        - `store.ts` - Zustand store with zundo undo/redo for configurator attributes;
+        - `queries.ts` - TanStack Query hooks for Threekit REST API;
+        - `queryKeys.ts` - query key factories;
+        - `types.ts` - Threekit attribute and configuration types;
 
 ### Application configuration & utilities
 
 - `src/lib` - contains core application utilities and configurations:
-    - `@http.ts` - HTTP client configuration and utilities;
-    - `@queryClient.ts` - Tanstack Query client configuration;
+    - `@http.ts` - Ky HTTP client instance;
+    - `@queryClient.ts` - TanStack Query client configuration;
     - `constants.ts` - global application constants;
-    - `schemas.ts` - global validation schemas;
-    - `regexps.ts` - global regular expressions;
     - `types.ts` - global TypeScript type definitions;
-    - `utils/` - global utility functions directory:
-        - `<utilDirName>/` - directory for grouped utility functions (optional);
-        - `<utilName>.ts` - individual utility files;
 
 ### Global application files
 
 - `src/hooks` - contains global hooks directory:
-    - `<hookName>.ts` - global hook files;
+    - `useThreekitInit.ts` - handles post-load initialization: reads initial attributes or restores a saved configuration via `shortId` URL param;
 - `src/context` - global React context providers:
-    - `<ContextName>.tsx` - global context files;
+    - `ThreekitContext/` - see [Threekit Context](#threekit-context);
 - `src/styles` - contains global style files:
     - `index.css` - the main CSS file;
-- `src/main.tsx` - entry point of the application;
-- `src/vite-env.d.ts` - Vite environment type definitions. This file should be updated every time you add new environment variables;
-- `src/routeTree.gen.ts` - auto-generated route tree file (do not edit manually);
-- `public/` - can contain static files such as images, fonts, videos, documents, favicons, etc.;
+- `src/threekit.d.ts` - global type declarations for `window.threekitPlayer` and `window.threekit`;
+- `src/vite-env.d.ts` - Vite environment type definitions. Update this file every time you add new environment variables;
+- `src/embed.tsx` - single entry point for the embed bundle;
+- `public/` - static files such as images, fonts, favicons, etc.;
 
 #### Build and output directories
 
-- `dist/` - production build output directory (generated after `npm run build`);
-- `tmp/` - temporary files directory containing:
-    - `bundle-visualizer.html` - bundle size analysis report (generated after build with rollup-plugin-visualizer);
+- `dist/` - SPA build output (generated after `npm run build`);
+- `dist-embed/` - embed bundle output (generated after `npm run build:embed`). Contains a single `threekit-embed.js` file ready for embedding;
 
 #### Configuration files
 
-- `index.html` - main HTML template file with meta tags, font loading, and root div element;
-- `vite.config.ts` - Vite configuration including plugins, build settings, and dev server options;
+- `index.html` - HTML template for local dev. Includes the `#threekit-player` mount div;
+- `vite.config.ts` - Vite configuration with dual build modes (SPA and embed IIFE);
 - `tsconfig.json` - main TypeScript configuration;
 - `tsconfig.app.json` - TypeScript configuration for application code;
 - `tsconfig.node.json` - TypeScript configuration for Node.js (Vite config);
 - `package.json` - project dependencies, scripts, and metadata;
-- `package-lock.json` - exact dependency versions lock file;
 
 #### Linting and formatting configuration
 
-- `eslint.config.js` - ESLint configuration for JavaScript/TypeScript linting;
-- `prettier.config.js` - Prettier configuration for code formatting;
-- `.prettierignore` - files and directories to ignore during Prettier formatting;
-- `.stylelintrc` - Stylelint configuration for CSS linting;
+- `eslint.config.js` - ESLint configuration;
+- `prettier.config.js` - Prettier configuration;
+- `.prettierignore` - files ignored by Prettier;
+- `.stylelintrc` - Stylelint configuration for CSS;
 
 #### Git and development configuration
 
-- `.gitignore` - Git ignore rules specifying which files to exclude from version control;
-- `.gitattributes` - Git attributes configuration for line endings and file handling;
-- `.husky/` - Git hooks directory for pre-commit and commit-msg validation;
+- `.gitignore` - Git ignore rules;
+- `.gitattributes` - Git attributes for line endings;
+- `.husky/` - Git hooks for pre-commit and commit-msg validation;
 - `commitlint.config.cjs` - commit message linting configuration;
 
 #### Editor and environment configurations
 
-- `.editorconfig` - editor configuration for consistent coding styles;
-- `.npmrc` - NPM configuration settings;
-- `.env.local.example` - example environment variables file (template for `.env.local`);
-- `.env.local` - local environment variables (should be created manually, not committed to git);
+- `.editorconfig` - consistent coding style across editors;
+- `.npmrc` - NPM configuration;
+- `.env.local.example` - example environment variables file;
+- `.env.local` - local environment variables (create manually, never commit);
 
 ### Icons
 
@@ -262,7 +244,7 @@ Icons should be located at `src/icons` folder.
 
 Every icon should:
 
-- Have lowercase name with kebab case formatting (example: `profile.svg` or `airplane-landing.svg`)
+- Have lowercase name with kebab case formatting (example: `profile.svg` or `arrow-left.svg`)
 
 Prerequisites:
 
@@ -270,551 +252,275 @@ Prerequisites:
 
 ### Contexts
 
-Contexts are optional for the root of the project and components among all the project.
+Contexts are optional for the root of the project and components.
 
-No matter, where the contexts will appear, they should:
+No matter where the contexts appear, they should:
 
-- Have separate `contexts` folder inside the folder where the hooks will be used
-    - Global contexts will be used in all the project, should be located at `src/contexts` folder. NOTE: Any component is allowed to call such contexts.
-    - If context will be used inside single component exclusively, you should create `contexts` folder inside the component folder. Example: `src/components/ArticleCard/contexts`. NOTE: such contexts are not allowed to be used outside of the component scope where the hooks folder were created. If such case appears, then you should move the hook(s) into global hooks folder. The child components (`src/components/ArticleCard/components/*`) only are allowed to use the context inside
+- Have a separate `contexts` folder inside the folder where they will be used
+    - Global contexts should be located at `src/context/` folder
+    - If a context is used inside a single component exclusively, create a `contexts` folder inside the component folder
 
 Each context should:
 
-- Be created inside the `contexts` folder
-- Have pascal case name, ending with `<contextName>Context` (example: `AuthContext.tsx`)
-- NOTE: The context file name should match the context name inside the file
-
-```ts
-// src/contexts/AuthContext.tsx
-
-const AuthContext = createContext(...);
-```
+- Have a pascal case name ending with `Context` (example: `ThreekitContext`)
+- The context file name should match the context name inside the file
 
 ### Hooks
 
-Hooks are optional for the root of the project and components among all the project.
+Hooks are optional for the root of the project and components.
 
-No matter, where the hooks will appear, they should:
+No matter where the hooks appear, they should:
 
-- Have separate `hooks` folder inside the folder where the hooks will be used
-    - Global hooks will be used in all the project, should be located at `src/hooks` folder
-    - If hook will be used inside single component exclusively, you should create `hooks` folder inside the component folder. Example: `src/components/ArticleCard/hooks`. NOTE: such hooks are not allowed to be used outside of the component scope where the hooks folder were created. If such case appears, then you should move the hook(s) into global hooks folder
+- Have a separate `hooks` folder inside the folder where they will be used
+    - Global hooks should be located at `src/hooks/` folder
+    - Component-level hooks stay inside the component folder and must not be used outside it
 
 Each hook should:
 
-- Be created inside the `hooks` folder
-- Have camel case name, starting with `use` (example: `useHavePermissions.ts`)
-- NOTE: The hook file name should match the hook name inside the file
+- Have a camel case name, starting with `use` (example: `useThreekitInit.ts`)
+- The hook file name should match the hook name inside the file
+
+#### Threekit hooks
+
+The following hooks are available globally from `src/context/ThreekitContext/hooks/`:
+
+| Hook                  | Description                                                             |
+| --------------------- | ----------------------------------------------------------------------- |
+| `useAttribute(name)`  | Reactively reads a single attribute value from the store                |
+| `useAttributes()`     | Reactively reads all attribute values from the store                    |
+| `useSetAttribute()`   | Returns `setAttribute(name, value)` — optimistic update + Threekit sync |
+| `useGetTranslation()` | Returns `getTranslation(nodeId)` — reads node translation from scene    |
+| `useGetRotation()`    | Returns `getRotation(nodeId)` — reads node rotation from scene          |
+| `usePlayerStatus()`   | Returns `{ isLoaded, isProcessing }`                                    |
+| `useUndoRedo()`       | Returns `{ undo, redo }`                                                |
+
+Or use `useThreekit()` to access all of the above at once:
 
 ```ts
-// src/hooks/useHavePermissions.ts
-
-export const useHavePermissions = () => {...}
+const { isLoaded, isProcessing, setAttribute, getTranslation, undo, redo } = useThreekit();
 ```
 
 #### Query hooks
 
-Query hooks can have the parameters to be passed like pagination, search params etc. These parameters should be passed into hooks as arguments. Recommended to pass the arguments as list of arguments, not as the object.
-
-Query keys should be defined as described in [`Query keys`](#query-keys) section.
-
-Example:
+Query hooks can receive parameters like pagination or search. Pass arguments as a list, not as an object.
 
 ```ts
-export const useGetBooks = (search: string) => {
+export const useGetSavedConfiguration = (shortId: string) => {
     return useQuery({
-        queryKey: BOOKS_QUERY_KEYS.listWithParams({ search }),
-        // ...
-    });
-};
-
-export const useGetBooksByAuthorName = (authorName: string, search: string) => {
-    return useQuery({
-        queryKey: BOOKS_QUERY_KEYS.itemByAuthor(authorName, { search }),
-        // ...
+        queryKey: THREEKIT_QUERY_KEYS.savedConfiguration(shortId),
+        queryFn: () => getSavedConfiguration(shortId),
+        enabled: !!shortId,
     });
 };
 ```
 
 ##### Query Keys
 
-It is also recommended to manage query keys in appropriate way to use them inside project.
-
-First things first, you should create the constant that includes queryKeys:
-
 ```ts
-// src/services/books/queryKeys.ts
+// src/services/threekit/queryKeys.ts
 
-export const BOOKS_QUERY_KEYS = {
-    all: ['books'] as const,
-    list() {
-        return [...BOOKS_QUERY_KEYS.all, 'list'] as const;
+export const THREEKIT_QUERY_KEYS = {
+    all: ['threekit'] as const,
+    savedConfiguration(shortId: string) {
+        return [...THREEKIT_QUERY_KEYS.all, 'configuration', shortId] as const;
     },
-    listWithParams(params: { search: string }) {
-        return [...BOOKS_QUERY_KEYS.list(), params] as const;
-    },
-    // ...
 };
 ```
-
-> NOTE: Query keys contacts are allowed to be used in all the project to make invalidations and prefetched possible on a lot of events occur by user activities.
-
-And apply this in:
-
-- Query hooks:
-    ```ts
-    export const useGetBooks = (search: string) => {
-        return useQuery({
-            queryKey: BOOKS_QUERY_KEYS.listWithParams({ search }),
-            // ...
-        });
-    };
-    ```
-- Query options:
-
-    ```ts
-    export const getBooksQueryOptions = (search: string) => {
-        return queryOption({
-            queryKey: BOOKS_QUERY_KEYS.listWithParams({ search }),
-            // ...
-        });
-    };
-
-    export const useGetBooks = (search: string) => {
-        return useQuery(getBooksQueryOptions(search));
-    };
-    ```
-
-- Query invalidations:
-
-    ```ts
-    import { BOOKS_QUERY_KEYS } from '@/services/books/queryKeys';
-
-    queryClient.invalidateQueries({
-        queryKey: BOOKS_QUERY_KEYS.list(),
-    });
-    ```
-
-- Query prefetches:
-
-    ```ts
-    import { BOOKS_QUERY_KEYS } from '@/services/books/queryKeys';
-
-    queryClient.prefetchQuery({
-        queryKey: BOOKS_QUERY_KEYS.list(),
-    });
-
-    // or
-
-    queryClient.getQueryData({
-        queryKey: BOOKS_QUERY_KEYS.list(),
-    });
-    ```
 
 #### Mutation hooks
 
-Mutation hooks from `useMutation` return the callable function as result, so no need to pass the arguments into hook call. But everything can happen to pass initial arguments into hook body directly for query client logic or whatever.
-
 ```ts
-// src/services/books/api.ts
-export const addBookToFavorites = (bookId: string) => {...}
-```
+// src/services/threekit/api.ts
+export const saveConfiguration = (config: Record<string, unknown>) => {...}
 
-```ts
-// src/services/books/queries.ts
-import { addBookToFavorites } from './api';
-
-export const addBookToFavoritesMutationOptions = () => {
+// src/services/threekit/queries.ts
+export const saveConfigurationMutationOptions = () => {
     return mutationOptions({
-        mutationFn: addBookToFavorites,
-        // ...
+        mutationFn: saveConfiguration,
     });
 };
-```
 
-```ts
-// somewhere
-import { useMutation } from '@tanstack/react-query';
-import { addBookToFavoritesMutationOptions } from '@/services/books/queries';
-
-// ...
-
-const { mutate: addBookToFavorites } = useMutation(addBookToFavoritesMutationOptions());
-
-// ...
-
-addBookToFavorites(bookId, {...})
+// somewhere in a component
+const { mutate: save } = useMutation(saveConfigurationMutationOptions());
+save(currentConfig);
 ```
 
 ### Utility functions
 
-Utility functions are optional for the root of the project and components among all the project.
+Utility functions are optional for the root of the project and components.
 
-No matter, where the utils will appear, they should:
+No matter where the utils appear, they should:
 
-- Have separate `utils` folder inside the folder where the utils will be used
-    - Global utils will be used in all the project, should be located at `src/utils` folder
-    - If util will be used inside single component exclusively, you should create `utils` folder inside the component folder. Example: `src/components/ArticleCard/utils`. NOTE: such utils are not allowed to be used outside of the component scope where the utils folder were created. If such case appears, then you should move the util(s) into global utils folder
-
-Each util should:
-
-- Be created inside the `utils` folder
-- Have camel case name (example: `getHasPermissions.ts`)
-- NOTE: The util file name should match the util name inside the file
-- (Optional): Unit tests can be written for the util
-    - `<utilName>.ts` -> `<utilName>.test.ts`
-
-```ts
-//getHasPermissions.ts
-
-export const getHasPermissions = () => {...}
-```
+- Have a separate `utils` folder inside the folder where they will be used
+    - Global utils should be located at `src/utils/` folder
+    - Component-level utils must not be used outside their component folder
 
 ### Constants
 
-Constants are optional for the root of the project and components among all the project.
-
-There are 2 types of constants to use:
+There are 2 types of constants:
 
 - Regular constants (`constants.ts`)
-- Schemas constants (`schemas/` folder)
-
-The rules described below are applied for both of them. The only difference is:
-
-- `constants.ts` - for regular constants like time tokens, regexps etc.
-- `schemas/` folder - for `zod` schemas will be used in other schemas in all the project
-
-No matter, where the constants will appear, they should:
-
-- Have separate `constants.ts` file inside the folder where the constants will be created
-    - Global constants will be used in all the project, should be located at `src/constants.ts` file
-    - If constants will be used inside single component exclusively, you should create `constants.ts` file inside the component folder. Example: `src/components/ArticleCard/constants.ts`.
-        > NOTE: such constants are not allowed to be used outside of the component scope where the constants file were created. If such case appears, then you should move the constants(s) into global constants file
-
-#### Schemas
-
-Schemas should:
-
-- Have separate `schemas` folder inside the folder where the schemas will be used
-    - Global schemas will be used in all the project, should be located at `src/schemas/` folder
-    - If schemas will be used inside single component exclusively, you should create `schemas/` folder inside the component folder. Example: `src/components/ArticleCard/schemas/`.
-- Each schema should have camel case name with ending `<schemaName>Schema.ts`.
-- Each schema should have its inferred type
-
-Few more thing should be applied to schemas:
-
-```ts
-import { z } from 'zod';
-// ...
-
-export const signUpSchema = z.object({...});
-export type SignUpSchema = z.infer<typeof signUpSchema>;
-```
+- Schema constants (`schemas/` folder — Zod schemas used across the project)
 
 ### Styles
 
-Styles are optional for the root of the project and components among all the project.
+The global styles are located inside `src/styles`:
 
-The global styles are located inside `src/styles` folder This folder should include:
+- `index.css` - root styles (imports other global style files)
+- `reset.css` - browser style reset
+- `variables.css` - global CSS custom properties (optional)
+- `fonts.css` - `@font-face` declarations (optional)
 
-- `index.css` - root project styles (incl. imports of other root style files described below)
-- `reset.css` - predefined browsers styles reset file
-- `variables.css` - (optional) global variables file. This file can be created if there are a lot of variables to create and manage them easily. In case of ~25 variables they can still be maintained in `index.css`.
-- `fonts.css` - (optional) global fonts to be implemented through `@font-face` directive.
-
-#### Anatomy
-
-The component should:
-
-- Have separate folder
-- Have pascal case name (example: `Button` or `ArticleCard`)
-- Have default export of the component itself
-
-The component folder should contain:
-
-- `index.tsx` - the component JSX, entry points of component
-- `styles.module.css` - the styles of component file (optional)
-
-> NOTE: If component has to haves hooks/utils/constants/contexts, take a look at relevant chapters above.
-
-### Modules
-
-Modules are core blocks are used for routing. Router entries render modules only. It is not allowed to pass the components from `src/components` or `src/ui`.
-
-Modules are located at `src/modules` folder.
-
-Modules represent pages we should display within router. Modules hierarchy may also represent the routes subrouting.
-
-Every module should:
-
-- be named for the route it represent:
-    - `http://localhost:3000/about` -> `src/modules/About`
-- have the same architecture as `src/components` or `src/ui` as described above
-- have no props
-- module name should match the module component name:
-
-    ```ts
-    // src/modules/About/index.tsx
-
-    export const About: React.FC = () => {...}
-    ```
-
-Modules are allowed:
-
-- to use `src/components` and/or `src/ui` components inside
-- to have own hooks
-- to have own constants/schemas/styles
-- to have own sub-modules and/or sub-components (`src/modules/About/components/...`)
-- to use its sub-modules inside if it is not a sub-route
-
-#### Submodules
-
-Submodules are the modules inside the some module (`src/modules/About/components/...`).
-
-Submodules may have everything regular modules can have and do, but they can be used in two ways:
-
-- as sub-component for the rot module
-    - but it is already not allowed to be used as sub-route
-- as sub-route:
-    - `src/modules/About/components/Settings` -> `http://localhost:3000/about/settings`
-
-### Routing
-
-Tanstack Router is used as main router utility with file-based routing functionality.
-
-Routes are located at `src/routes` folder.
-
-#### `__root.tsx` file
-
-Thi file is used to set up the initial router with global component and parameters.
-
-Root file may include:
-
-- Devtools
-- Global context providers
-- 404 page set up
-
-#### File-based routing
-
-All files and folders inside `src/routes` folder are represented as client routes by the file name:
-
-```
-src/routes/index.tsx -> http://localhost:3000/
-src/routes/about.tsx -> http://localhost:3000/about
-```
-
-Folders cam include the subroutes and index route:
-
-```
-src/routes/about/index.tsx -> http://localhost:3000/about
-src/routes/about/settings/index.tsx -> http://localhost:3000/about/settings
-```
-
-Routes can be lazy-loaded or not.
-
-Lazy-loaded routes can:
-
-- render the module dynamically when the route is called
-- include pending components
-- include error component
-- include 404 component
-
-Regular route can:
-
-- everything lazy-loaded routes can
-- validate search parameters
-- perform prefetches with loader
-- perform actions before loader executes
-
-> NOTE: regular routes have more memory load, so if no need in search parameters load or prefetch, plea use lazy routes.
-
-Route have different file naming convection inside `src/routes` folder:
-
-Routes should:
-
-- be named with kebab-case lowercase (`src/routes/<route-name>/`)
-- have index file with `.tsx` extension (`src/routes/<route-name>/index.tsx`)
-- If lazy - add `.lazy` before `.tsx` (`src/routes/<route-name>/index.lazy.tsx`)
-- have no props
-- have route module name matched to route name but pascal-case ending with `<ModuleName>Page`:
-
-    ```ts
-    // src/routes/about/index.tsx
-
-    import About from '@/modules/about';
-
-    const AboutPage = createLazyFileRoute('/about')({
-        component: About,
-    });
-    ```
-
-#### Mixing route types
-
-There is possibility to have route mixing between lazy and regular.
-
-We are able to split the logic this way:
-
-- Regular route
-    - validate search parameters
-    - perform prefetches with loader
-    - perform actions before loader executes
-- Lazy route
-    - render the module dynamically when the route is called
-
-In terms of code it looks this way:
-
-Folder structure:
-
-```
-src/
-└── routes/
-    └── about/
-        ├── index.tsx
-        └── index.lazy.tsx
-```
-
-```ts
-// index.lazy.tsx
-
-import About from '@/modules/about';
-
-const AboutPage = createLazyFileRoute('/about')({
-    component: About
-})
-
-// index.tsx
-import { noopReturnNull } from '@/utils/noopReturnNull';
-
-const AboutPage = createFileRoute('/about')({
-    component: noopReturnNull,
-    validateSearch(search) {...},
-    beforeLoad() {...}
-    loader({ search }) {...},
-})
-```
-
-#### Layouts
-
-Tanstack router allows to create layouts.
-
-Layouts should:
-
-- be named for layout semantics, kebab-case, starting with `_` and ending with `-layout`:
-    - Example: `src/routes/_protected-layout/`
-- have both folder and file (not lazy) named by this layout:
-    ```
-    src/
-      └── routes/
-          ├── _protected-layout/
-          │   └── index.lazy.tsx
-          └── _protected-layout.tsx
-    ```
-
-Layout component should be stored at `src/components/layouts` folder.
-
-Layout components should:
-
-- have same structure as `src/components` have
-- include `<Outlet />` a child of component
-- have no props
-
-```ts
-// src/components/layouts/ProtectedLayout/index.tsx
-import { Outlet } from '@tanstack/react-router';
-
-const ProtectedLayout: React.FC = () => {
-    return (
-        <div>
-            // ...
-            <Outlet />
-        </div>
-    )
-}
-
-// src/routes/_protected-layout.tsx
-
-import ProtectedLayout from '@/components/layouts/ProtectedLayout';
-
-const ProtectedLayoutPage = createFileRoute('/_protected-layout')({
-    component: ProtectedLayout
-    // ...
-})
-```
-
-#### Route API hooks
-
-Routes have own hooks like `useSearch` and `useNavigate` or other that `getRouteApi` return ([docs](https://tanstack.com/router/v1/docs/framework/react/api/router/getRouteApiFunction)). For optimizing the router tree iterations and by following the maintainer recommendations we should have the `from` attribute predefined for each route we have the hooks calls at.
-
-it is recommended to create custom route hooks for each module as follows:
-
-- be located in module hooks folder
-- have name based on module name: `src/modules/<ModuleName>/` -> `src/modules/<ModuleName>/hooks/use<ModuleName>RouteApi.ts`:
-    - Example: `src/modules/About/` -> `src/modules/About/hooks/useAboutRouteApi.ts`
-
-```ts
-// src/modules/About/hooks/ueAboutRouteApi.ts
-
-import { getRouteApi } from '@tanstack/react-router';
-
-const aboutRouteApi = getRouteApi('/about');
-
-export const ueAboutRouteApi = () => {
-    const search = aboutRouteApi.useSearch();
-    const navigate = aboutRouteApi.useNavigate();
-
-    return { search, navigate };
-};
-
-// src/modules/About/index.tsx
-
-const About: React.FC = () => {
-    const { search, navigate } = ueAboutRouteApi();
-
-    // ...
-};
-```
-
-If no search needed, you may just return the navigate. Route API logic allows us to get the route data directly by setting the entry point as route id, which is autocompleted in dev mode launched.
-
-This methodology can be applied to layouts a well.
+---
 
 ## ✳️ Icons Usage
 
-1. Collect all icons as separate files with `.svg` extension and kebab-case naming.
+> **Note:** We use `vite-plugin-svgr` to handle icons. This ensures that SVGs are transformed into React components and bundled directly into the JavaScript file, which is essential for **cross-origin** compatibility in embed builds.
 
-Example:
+1. Place icons in `src/icons/` with kebab-case naming:
 
-```md
-src ├── icons │ ├── arrow-left.svg │ ├── search.svg │ └── arrow-right-circle.svg
+```
+src/
+└── icons/
+    ├── arrow-left.svg
+    ├── search.svg
+    └── arrow-right-circle.svg
 ```
 
-2. Import icon required as follows:
+2. To use an icon, import it with the ?react suffix. This tells Vite to treat the SVG as a React component:
 
 ```ts
-import { Component as ArrowLeftIcon } from '@/icons/arrow-left.svg?svgUse';
+import ArrowLeftIcon from '@/icons/arrow-left.svg?react';
 ```
 
-3. Use the icon as regular JSX component:
+3. Use as JSX:
 
-```ts
+```tsx
 <ArrowLeftIcon className={s.icon} />
 ```
 
-Type of the component and its props: Location: `Location: node_modules/@svg-use/react/dist/esm/ThemesExternalSvg.d.ts`
+---
 
-```ts
-declare const createThemedExternalSvg: ({
-    url,
-    id,
-    viewBox,
-}: FactoryProps) => (props: ThemeProps & SVGAttributes<SVGSVGElement>) => JSX.Element;
+## 🎮 Threekit Integration
 
-export interface ThemeProps {
-    color?: string;
-    colorSecondary?: string;
-    colorTertiary?: string;
-}
+### How it works
+
+The template uses `@threekit-tools/treble` (`ThreekitProvider`) to initialize the Threekit player and load the `threekit-player.js` script from the Threekit CDN. On top of that, a custom `ThreekitContextProvider` exposes all API methods via React context and keeps attribute state in a Zustand store.
+
+Provider hierarchy in `embed.tsx`:
+
 ```
+QueryClientProvider
+  └── ThreekitProvider          ← initializes window.threekit via Treble
+        └── ThreekitContextProvider   ← exposes useThreekit() and Zustand store
+              └── Configurator
+                    ├── Player  ← mounts the Threekit player div
+                    └── Form    ← reads/writes attributes
+```
+
+### Initialization flow
+
+After the Threekit player loads (`useThreekitInitStatus` returns `true`), `useThreekitInit` runs automatically inside `<Player />`:
+
+1. Checks for `?shortId=` in the URL;
+2. If found — fetches the saved configuration and applies it to the player;
+3. If not found — reads initial attributes directly from `window.threekit.configurator`;
+4. Populates the Zustand store with the attributes;
+5. Sets `isLoaded = true` so the form renders.
+
+### Saved configuration
+
+To open a saved configuration, append `?shortId=<id>` to the page URL:
+
+```
+https://your-client-site.com/product-page?shortId=EXIPiBA56
+```
+
+The template will automatically detect this, fetch the configuration from Threekit, apply it to the player, and populate the store.
+
+### Reading attributes reactively
+
+```tsx
+import { useAttribute } from '@/context/ThreekitContext/hooks/useAttribute';
+
+const ColorPicker = ({ attributeName }: { attributeName: string }) => {
+    const attribute = useAttribute(attributeName);
+
+    return (
+        <div>
+            {(attribute as any)?.values?.map((color: any) => (
+                <button
+                    key={color.assetId}
+                    className={color.assetId === (attribute as any)?.value?.assetId ? 'active' : ''}
+                />
+            ))}
+        </div>
+    );
+};
+```
+
+### Setting attributes
+
+```tsx
+import { useSetAttribute } from '@/context/ThreekitContext/hooks/useSetAttribute';
+
+const ColorPicker = ({ attributeName }: { attributeName: string }) => {
+    const setAttribute = useSetAttribute();
+
+    const handleChange = (assetId: string) => {
+        // Optimistically updates store, then syncs with Threekit
+        setAttribute(attributeName, { assetId });
+    };
+
+    return <button onClick={() => handleChange('some-asset-id')} />;
+};
+```
+
+### Undo / Redo
+
+```tsx
+import { useUndoRedo } from '@/context/ThreekitContext/hooks/useUndoRedo';
+
+const Controls = () => {
+    const { undo, redo } = useUndoRedo();
+
+    return (
+        <>
+            <button onClick={undo}>Undo</button>
+            <button onClick={redo}>Redo</button>
+        </>
+    );
+};
+```
+
+---
+
+## 🔨 Embed build
+
+The template supports two build modes controlled by the `BUILD_MODE` environment variable:
+
+| Command               | Output                         | Format             | Use case                       |
+| --------------------- | ------------------------------ | ------------------ | ------------------------------ |
+| `npm run build`       | `dist/`                        | SPA                | Local dev / standalone hosting |
+| `npm run build:embed` | `dist-embed/threekit-embed.js` | IIFE (single file) | Embedding in client pages      |
+
+The embed build inlines all assets (images, fonts, SVGs) into a single JS file — no external requests needed from the host page.
+
+### Embedding in a client page
+
+Add a mount div and load the embed script on the client's page:
+
+```html
+<!-- Mount container -->
+<div id="threekit-player" style="width: 100%; height: 600px;"></div>
+
+<!-- Embed script (host it on your CDN or Threekit Launchpad) -->
+<script src="https://your-cdn.com/threekit-embed.js"></script>
+```
+
+To open a saved configuration, append `?shortId=<id>` to the page URL.
+
+---
 
 ## Getting Started
 
@@ -827,7 +533,7 @@ Click **"Use this template"** → **"Create a new repository"** on the repositor
 ### Via GitHub CLI
 
 ```bash
-gh repo create <my-new-project> --template ruslan-krasiuk/rkr-template --clone
+gh repo create <my-new-project> --template ruslan-krasiuk/threekit-rkr-template --clone
 cd <my-new-project>
 ```
 
@@ -836,10 +542,18 @@ cd <my-new-project>
 ```bash
 npm install
 cp .env.local.example .env.local
+# Add your Threekit credentials to .env.local
 npm run dev
 ```
 
-Key moments:
+### Environment variables
 
-- 👉 Import Component names export, then name it as applicable icon naming is.
-- 👉 Autocomplete will support path to the svg file, ⚠️BUT⚠️ you should add ?svgUse param at the end of import statement for @svg-use to work
+| Variable                         | Description                                    |
+| -------------------------------- | ---------------------------------------------- |
+| `VITE_TK_ENV`                    | Threekit environment: `preview` or `admin-fts` |
+| `VITE_TK_PUBLIC_TOKEN`           | Public token for `preview` environment         |
+| `VITE_TK_ASSET_ID`               | Asset ID for `preview` environment             |
+| `VITE_TK_ORG_ID`                 | Org ID for `preview` environment               |
+| `VITE_TK_ADMIN_FTS_PUBLIC_TOKEN` | Public token for `admin-fts` environment       |
+| `VITE_TK_ADMIN_FTS_ASSET_ID`     | Asset ID for `admin-fts` environment           |
+| `VITE_TK_ADMIN_FTS_ORG_ID`       | Org ID for `admin-fts` environment             |

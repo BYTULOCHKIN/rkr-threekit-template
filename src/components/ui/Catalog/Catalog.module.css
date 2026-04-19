@@ -1,0 +1,16 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    display: flex;
+    gap: 2rem;
+}
+
+@media (--md) {
+    .content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

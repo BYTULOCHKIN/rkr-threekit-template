@@ -1,0 +1,54 @@
+.playerOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.changeCamerasWidget {
+    position: absolute;
+    top: 60px;
+    left: 10px;
+}
+
+.viewsList {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    flex-shrink: 0;
+    width: 70px;
+}
+
+.viewItem {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    padding: 5px;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    cursor: pointer;
+
+    > img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    &.active {
+        &::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            top: 0;
+            left: 0;
+            background: #0090c2;
+        }
+    }
+}

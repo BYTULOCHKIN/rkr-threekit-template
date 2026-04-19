@@ -9,7 +9,7 @@
     --color-white-500: #f8f9fa;
     --color-white-600: #d2d7da;
     --color-white-700: #f7f2ee;
-    --color-primary: #1c69d4;
+    --color-primary: #415364;
     --color-secondary: #cc0000;
     --color-secondary-beige: #d0c1b1;
     --color-dark-1000: #000000;
@@ -41,8 +41,8 @@
     --color-surface-raised-active: #0f4499;
 
     /* ── Текст ──────────────────────────────────────────────────────────────── */
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #737b8f;
+    --color-text-primary: #000000;
+    --color-text-secondary: #ffffff;
 
     /* ── Радіуси ────────────────────────────────────────────────────────────── */
     --radius-sm: 2rem;
@@ -67,7 +67,7 @@
 }
 
 body {
-    font-family: "Poppins", sans-serif;
+    font-family: "Geologica", sans-serif;
 }
 
 .sr-only {
