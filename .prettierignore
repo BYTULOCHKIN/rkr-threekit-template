@@ -3,3 +3,6 @@
 **/tmp
 
 routeTree.gen.ts
+
+.claude/**
+skills-lock.json

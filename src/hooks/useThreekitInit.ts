@@ -1,32 +1,42 @@
+import { useEffect } from 'react';
 import { useConfiguratorStore } from '@/store/store';
-import { PRIVATE_APIS } from '@threekit-tools/treble/dist/types';
-import { getSavedConfiguration } from '@/services/threekit/api';
+import { useQuery } from '@tanstack/react-query';
+import { useThreekitInitStatus } from '@threekit-tools/treble';
+import { threekitAdapter } from '@/services/threekit/adapter';
+import { savedConfigurationQueryOptions } from '@/services/threekit/queries';
+import { startSync } from '@/services/threekit/sync';
+
+const getShortId = () => {
+    return new URLSearchParams(window.location.search).get('shortId');
+};
 
 export const useThreekitInit = () => {
-    const { setLoaded, setAttributes, setProcessing } = useConfiguratorStore();
+    const trebleReady = useThreekitInitStatus();
+    const shortId = getShortId();
+    const setAttributes = useConfiguratorStore((state) => {
+        return state.setAttributes;
+    });
 
-    const init = async () => {
-        const shortId = new URLSearchParams(window.location.search).get('shortId');
+    const { data: savedConfig, isSuccess: savedConfigLoaded } = useQuery({
+        ...savedConfigurationQueryOptions(shortId),
+        enabled: !!shortId && trebleReady,
+    });
+
+    useEffect(() => {
+        if (!trebleReady) return;
+        startSync();
 
         if (shortId) {
-            setProcessing(true);
-            try {
-                const savedConfig = await getSavedConfiguration(shortId);
-                await window.threekit.configurator.setConfiguration(savedConfig.variant);
-                const privatePlayer = window.threekit.player.enableApi(PRIVATE_APIS.PLAYER);
-                await privatePlayer.api.evaluate();
-                const attributes = window.threekit.configurator.getDisplayAttributes();
-                setAttributes(attributes);
-            } finally {
-                setProcessing(false);
-            }
-        } else {
-            const attributes = window.threekit.configurator.getDisplayAttributes();
-            setAttributes(attributes);
+            if (!savedConfigLoaded || !savedConfig) return;
+            let cancelled = false;
+            void threekitAdapter.applyConfiguration(savedConfig.variant).then(() => {
+                if (!cancelled) setAttributes(threekitAdapter.getAttributes());
+            });
+            return () => {
+                cancelled = true;
+            };
         }
 
-        setLoaded(true);
-    };
-
-    return { init };
+        setAttributes(threekitAdapter.getAttributes());
+    }, [trebleReady, shortId, savedConfig, savedConfigLoaded, setAttributes]);
 };

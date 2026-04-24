@@ -1,55 +1,61 @@
-import { IThreekitDisplayAttribute } from '@threekit-tools/treble/dist/types';
-import { temporal } from 'zundo';
+import type { AttributeMap, AttributeValue } from '@/domain/configurator';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 interface ConfiguratorState {
-    attributes: Array<IThreekitDisplayAttribute>;
-    isProcessing: boolean;
-    isLoaded: boolean;
-    setAttribute: (name: string, value: unknown) => void;
-    setAttributes: (attributes: Array<IThreekitDisplayAttribute>) => void;
-    setProcessing: (value: boolean) => void;
-    setLoaded: (value: boolean) => void;
+    attributes: AttributeMap;
+    ui: Record<string, unknown>;
+    scene: Record<string, unknown>;
+    meta: Record<string, unknown>;
+    setAttribute: (name: string, value: AttributeValue) => void;
+    setAttributes: (attributes: AttributeMap) => void;
+    setUi: (key: string, value: unknown) => void;
+    setScene: (key: string, value: unknown) => void;
+    setMeta: (key: string, value: unknown) => void;
 }
 
 export const useConfiguratorStore = create<ConfiguratorState>()(
     devtools(
-        temporal(
-            (set) => {
-                return {
-                    attributes: [],
-                    isProcessing: false,
-                    isLoaded: false,
+        (set) => {
+            return {
+                attributes: {},
+                ui: {},
+                scene: {},
+                meta: {},
 
-                    setAttribute: (name, value) => {
-                        return set((state) => {
-                            return {
-                                attributes: state.attributes.map((attr) => {
-                                    return attr.name === name ? { ...attr, value: value as never } : attr;
-                                }),
-                            };
-                        });
-                    },
-
-                    setAttributes: (attributes) => {
-                        return set({ attributes });
-                    },
-                    setProcessing: (value) => {
-                        return set({ isProcessing: value });
-                    },
-                    setLoaded: (value) => {
-                        return set({ isLoaded: value });
-                    },
-                };
-            },
-            {
-                limit: 50,
-                partialize: (state) => {
-                    return { attributes: state.attributes };
+                setAttribute: (name, value) => {
+                    return set((state) => {
+                        const existing = state.attributes[name];
+                        if (!existing) return state;
+                        return {
+                            attributes: {
+                                ...state.attributes,
+                                [name]: { ...existing, value },
+                            },
+                        };
+                    });
                 },
-            }
-        ),
-        { name: 'ConfiguratorStore' } // 4. Название стора для Redux DevTools
+
+                setAttributes: (attributes) => {
+                    return set({ attributes });
+                },
+                setUi: (key, value) => {
+                    return set((state) => {
+                        return { ui: { ...state.ui, [key]: value } };
+                    });
+                },
+                setScene: (key, value) => {
+                    return set((state) => {
+                        return { scene: { ...state.scene, [key]: value } };
+                    });
+                },
+                setMeta: (key, value) => {
+                    return set((state) => {
+                        return { meta: { ...state.meta, [key]: value } };
+                    });
+                },
+            };
+        },
+        { name: 'ConfiguratorStore' }
     )
 );
