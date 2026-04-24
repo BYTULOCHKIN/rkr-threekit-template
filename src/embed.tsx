@@ -1,6 +1,5 @@
 import { Configurator } from '@/configurator';
 import { queryClient } from '@/lib/@queryClient';
-import { ThreekitContextProvider } from '@/context/ThreekitContext';
 
 import '@/styles/index.css';
 import '@fontsource/geologica/300.css';
@@ -49,9 +48,7 @@ ReactDOM.createRoot(el).render(
                     display: DISPLAY_OPTIONS.WEBGL,
                 }}
             >
-                <ThreekitContextProvider>
-                    <Configurator />
-                </ThreekitContextProvider>
+                <Configurator />
             </ThreekitProvider>
         </QueryClientProvider>
     </StrictMode>

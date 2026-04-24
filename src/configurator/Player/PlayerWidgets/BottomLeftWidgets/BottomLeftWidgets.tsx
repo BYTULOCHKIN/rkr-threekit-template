@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { Player } from '@threekit-tools/treble/dist';
 import clsx from 'clsx';
-import { useUndoRedo } from '@/context/ThreekitContext/hooks/useUndoRedo';
+import { useConfigurator } from '@/hooks/useConfigurator';
 import { Button } from '@/components/ui/Button/Button';
 import s from './BottomLeftWidgets.module.css';
 
 export const BottomLeftWidgets = () => {
-    const { undo, redo } = useUndoRedo();
+    const { undo, redo } = useConfigurator();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

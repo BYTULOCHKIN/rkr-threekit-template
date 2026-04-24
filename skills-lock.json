@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "skills": {
+    "accessible-html-jsx": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "05f6d3c1bc447070d2e244f92f38eeb35653eb72ab4b9d67551bacae7bbcac41"
+    },
+    "do-work": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "4c3c9d9b7daad9a3a315317dc303aefb4ab518a5262f5dd1f07e91d9df3490e0"
+    },
+    "npm-audit-install": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "c38a2e2af172eb4f2412bbeac18fd7319510e3c0d0812df1a4c253b8bd3f2c0a"
+    },
+    "react": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "692cfa4ef2f1c1761ac2cdddc50de0d387f465a8571e0acb19768820e1796f5c"
+    },
+    "tanstack-query": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "d0c4e0cd8542c374699043201254a7e3ad09c4a75be8481efcb58a32b3bde042"
+    },
+    "to-issue": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "21e30c8b1b1ce336db8f9026ea96043c8af6b3a5d9aa25ee21c5b0f2569551a2"
+    },
+    "to-prd": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "ab67e83d37d413a0af3dff2bfaf36e84ac46340ec5a1d6338d8e7feac55113e1"
+    },
+    "typescript": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "dc42d94968ccf0630017a8828f9cea1487fb20edfdaa5d934a6a2737bfbad777"
+    },
+    "web-security": {
+      "source": "Phenomenon-Studio/phenomenon-skills",
+      "sourceType": "github",
+      "computedHash": "29d093b9c1372deb192dedbcc2beb5163b2f2b7360e4faf4da11bdeb8ebd4fef"
+    },
+    "write-a-skill": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "computedHash": "b44d8aab2ead83c716e01af4c9a24ccc4575ce70ad58ec4f1749fb88c9cc82ba"
+    },
+    "zoom-out": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "computedHash": "b549a5421e015c19eaac2131056a77d2d61adcd192760c3000dba8a824132970"
+    }
+  }
+}

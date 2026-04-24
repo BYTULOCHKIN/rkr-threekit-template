@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePlayerStatus } from '@/context/ThreekitContext/hooks/usePlayerStatus';
+import { usePlayer } from '@/hooks/usePlayer';
 
 // import BottomCenterWidgets from './BottomCenterWidgets/BottomCenterWidgets';
 // import { BottomLeftWidgets } from './BottomLeftWidgets/BottomLeftWidgets';
@@ -7,7 +7,7 @@ import { usePlayerStatus } from '@/context/ThreekitContext/hooks/usePlayerStatus
 // import { TopLeftWidget } from './TopLeftWidget/TopLeftWidget';
 
 export const PlayerWidgets: React.FC = () => {
-    const { isLoaded } = usePlayerStatus();
+    const { isLoaded } = usePlayer();
 
     if (!isLoaded) return null;
     // return (

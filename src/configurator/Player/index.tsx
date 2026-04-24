@@ -9,7 +9,8 @@ export const Player = (props: { children?: React.ReactNode }) => {
     const [portalPlayerTo, portalBack] = usePlayerPortal();
     const hasLoaded = useThreekitInitStatus();
     const hasMoved = useRef<boolean>(false);
-    const { init } = useThreekitInit();
+
+    useThreekitInit();
 
     useEffect(() => {
         if (portalPlayerTo && !hasMoved.current && hasLoaded) {
@@ -24,12 +25,6 @@ export const Player = (props: { children?: React.ReactNode }) => {
             }
         };
     }, [portalPlayerTo, hasLoaded, portalBack]);
-
-    useEffect(() => {
-        if (hasLoaded) {
-            init();
-        }
-    }, [hasLoaded, init]);
 
     return (
         <div className={s.playerWrapper}>

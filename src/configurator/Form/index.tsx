@@ -1,10 +1,10 @@
-import { useAttributes } from '@/context/ThreekitContext/hooks/useAttributes';
-import { usePlayerStatus } from '@/context/ThreekitContext/hooks/usePlayerStatus';
+import { useConfigurator } from '@/hooks/useConfigurator';
+import { usePlayer } from '@/hooks/usePlayer';
 import s from './styles.module.css';
 
 export const Form = () => {
-    const { isLoaded, isProcessing } = usePlayerStatus();
-    const attributes = useAttributes();
+    const { isLoaded, isProcessing } = usePlayer();
+    const { attributes } = useConfigurator();
 
     if (!isLoaded) {
         return (
@@ -19,11 +19,11 @@ export const Form = () => {
             {isProcessing && <div className={s.processing} />}
 
             <ul className={s.attributeList}>
-                {attributes.map((attribute, idx) => {
+                {Object.values(attributes).map((attribute) => {
                     return (
-                        <li key={idx} className={s.attributeItem}>
+                        <li key={attribute.name} className={s.attributeItem}>
                             <span className={s.attributeName}>{attribute.name}</span>
-                            <span className={s.attributeValue}>{JSON.stringify(attribute?.value ?? attribute)}</span>
+                            <span className={s.attributeValue}>{JSON.stringify(attribute.value)}</span>
                         </li>
                     );
                 })}
