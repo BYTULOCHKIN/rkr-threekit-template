@@ -1,11 +1,12 @@
+import { useCallback } from 'react';
 import { useConfiguratorStore } from '@/store/store';
 import { PRIVATE_APIS } from '@threekit-tools/treble/dist/types';
 import { getSavedConfiguration } from '@/services/threekit/api';
 
 export const useThreekitInit = () => {
-    const { setLoaded, setAttributes, setProcessing } = useConfiguratorStore();
+    const init = useCallback(async () => {
+        const { setLoaded, setAttributes, setProcessing } = useConfiguratorStore.getState();
 
-    const init = async () => {
         const shortId = new URLSearchParams(window.location.search).get('shortId');
 
         if (shortId) {
@@ -26,7 +27,7 @@ export const useThreekitInit = () => {
         }
 
         setLoaded(true);
-    };
+    }, []); // порожній deps — функція створюється один раз
 
     return { init };
 };
