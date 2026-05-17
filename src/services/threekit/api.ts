@@ -6,12 +6,12 @@ export interface SavedConfiguration {
     metadata: Record<string, unknown>;
 }
 
-export const getSavedConfiguration = (shortId: string): Promise<SavedConfiguration> => {
+export const getSavedConfiguration = (configurationId: string): Promise<SavedConfiguration> => {
     const token = import.meta.env.VITE_TK_PUBLIC_TOKEN;
     const env = import.meta.env.VITE_TK_ENV ?? 'preview';
 
     return http
-        .get(`https://${env}.threekit.com/api/configurations/${shortId}`, {
+        .get(`https://${env}.threekit.com/api/configurations/${configurationId}`, {
             searchParams: { bearer_token: token },
         })
         .json<SavedConfiguration>();

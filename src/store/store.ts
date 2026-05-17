@@ -2,15 +2,21 @@ import { IThreekitDisplayAttribute } from '@threekit-tools/treble/dist/types';
 import { temporal } from 'zundo';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { NestedPath } from '@/context/ThreekitContext/nested-types';
 
-interface ConfiguratorState {
+export interface ConfiguratorState {
     attributes: Array<IThreekitDisplayAttribute>;
     isProcessing: boolean;
     isLoaded: boolean;
+    nestedPath: NestedPath;
+    nestedAttributes: Record<string, IThreekitDisplayAttribute[]>;
+
     setAttribute: (name: string, value: unknown) => void;
     setAttributes: (attributes: Array<IThreekitDisplayAttribute>) => void;
     setProcessing: (value: boolean) => void;
     setLoaded: (value: boolean) => void;
+    setNestedPath: (value: NestedPath) => void;
+    setNestedAttributes: (pathKey: string, attrs: IThreekitDisplayAttribute[]) => void;
 }
 
 export const useConfiguratorStore = create<ConfiguratorState>()(
@@ -19,8 +25,10 @@ export const useConfiguratorStore = create<ConfiguratorState>()(
             (set) => {
                 return {
                     attributes: [],
+                    nestedAttributes: {},
                     isProcessing: false,
                     isLoaded: false,
+                    nestedPath: ['SOME_NESTED_ATTR_NAME'], //JUST EXAMPLE. REMOVE OR UPDATE TO REAL NAME
 
                     setAttribute: (name, value) => {
                         return set((state) => {
@@ -40,6 +48,16 @@ export const useConfiguratorStore = create<ConfiguratorState>()(
                     },
                     setLoaded: (value) => {
                         return set({ isLoaded: value });
+                    },
+                    setNestedPath(value) {
+                        return set({ nestedPath: value });
+                    },
+                    setNestedAttributes: (pathKey, attrs) => {
+                        return set((state) => {
+                            return {
+                                nestedAttributes: { ...state.nestedAttributes, [pathKey]: attrs },
+                            };
+                        });
                     },
                 };
             },

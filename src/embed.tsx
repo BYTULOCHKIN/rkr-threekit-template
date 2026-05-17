@@ -45,7 +45,7 @@ ReactDOM.createRoot(el).render(
                     },
                 }}
                 playerConfig={{
-                    publishStage: 'published',
+                    publishStage: 'draft',
                     display: DISPLAY_OPTIONS.WEBGL,
                 }}
             >

@@ -1,0 +1,10 @@
+/* Font connect example */
+
+/* Helvetica — Regular 400 */
+@font-face {
+    font-family: "Helvetica";
+    src: url("@/assets/fonts/Helvetica-Regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}

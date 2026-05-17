@@ -1,9 +1,14 @@
-import { useConfiguratorStore } from '@/store/store';
+import { IConfigurationAttribute } from '@threekit-tools/treble/dist/types';
+import { useGetAttribute } from './useGetAttribute';
+import { useSetAttribute } from './useSetAttribute';
 
 export const useAttribute = (name: string) => {
-    return useConfiguratorStore((state) => {
-        return state.attributes.find((attr) => {
-            return attr.name === name;
-        });
-    });
+    const attribute = useGetAttribute(name);
+    const setAttribute = useSetAttribute();
+
+    const setValue = (value: IConfigurationAttribute) => {
+        return setAttribute(name, value);
+    };
+
+    return { attribute, setValue } as const;
 };

@@ -1,31 +1,12 @@
 import { useCallback } from 'react';
 import { useConfiguratorStore } from '@/store/store';
-import { PRIVATE_APIS } from '@threekit-tools/treble/dist/types';
-import { getSavedConfiguration } from '@/services/threekit/api';
 
 export const useThreekitInit = () => {
-    const init = useCallback(async () => {
-        const { setLoaded, setAttributes, setProcessing } = useConfiguratorStore.getState();
+    const init = useCallback(() => {
+        const { setLoaded, setAttributes } = useConfiguratorStore.getState();
+        const attributes = window.threekit.configurator.getDisplayAttributes();
 
-        const shortId = new URLSearchParams(window.location.search).get('shortId');
-
-        if (shortId) {
-            setProcessing(true);
-            try {
-                const savedConfig = await getSavedConfiguration(shortId);
-                await window.threekit.configurator.setConfiguration(savedConfig.variant);
-                const privatePlayer = window.threekit.player.enableApi(PRIVATE_APIS.PLAYER);
-                await privatePlayer.api.evaluate();
-                const attributes = window.threekit.configurator.getDisplayAttributes();
-                setAttributes(attributes);
-            } finally {
-                setProcessing(false);
-            }
-        } else {
-            const attributes = window.threekit.configurator.getDisplayAttributes();
-            setAttributes(attributes);
-        }
-
+        setAttributes(attributes);
         setLoaded(true);
     }, []); // порожній deps — функція створюється один раз
 
