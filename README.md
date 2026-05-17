@@ -176,7 +176,7 @@ Table of contents:
 
 - `src/services` - contains service layer for API calls and external integrations:
     - `threekit/` - Threekit-specific service layer:
-        - `api.ts` - REST API calls to Threekit (e.g. `getSavedConfiguration`);
+        - `api.ts` - REST API calls to Threekit (e.g. `getSavedConfiguration` for reading saved configuration metadata);
         - `store.ts` - Zustand store with zundo undo/redo for configurator attributes;
         - `queries.ts` - TanStack Query hooks for Threekit REST API;
         - `queryKeys.ts` - query key factories;
@@ -193,7 +193,7 @@ Table of contents:
 ### Global application files
 
 - `src/hooks` - contains global hooks directory:
-    - `useThreekitInit.ts` - handles post-load initialization: reads initial attributes or restores a saved configuration via `shortId` URL param;
+    - `useThreekitInit.ts` - handles post-load synchronization: reads display attributes from the initialized player and stores them in Zustand;
 - `src/context` - global React context providers:
     - `ThreekitContext/` - see [Threekit Context](#threekit-context);
 - `src/styles` - contains global style files:
@@ -305,11 +305,11 @@ const { isLoaded, isProcessing, setAttribute, getTranslation, undo, redo } = use
 Query hooks can receive parameters like pagination or search. Pass arguments as a list, not as an object.
 
 ```ts
-export const useGetSavedConfiguration = (shortId: string) => {
+export const useGetSavedConfiguration = (configurationId: string) => {
     return useQuery({
-        queryKey: THREEKIT_QUERY_KEYS.savedConfiguration(shortId),
-        queryFn: () => getSavedConfiguration(shortId),
-        enabled: !!shortId,
+        queryKey: THREEKIT_QUERY_KEYS.savedConfiguration(configurationId),
+        queryFn: () => getSavedConfiguration(configurationId),
+        enabled: !!configurationId,
     });
 };
 ```
@@ -321,8 +321,8 @@ export const useGetSavedConfiguration = (shortId: string) => {
 
 export const THREEKIT_QUERY_KEYS = {
     all: ['threekit'] as const,
-    savedConfiguration(shortId: string) {
-        return [...THREEKIT_QUERY_KEYS.all, 'configuration', shortId] as const;
+    savedConfiguration(configurationId: string) {
+        return [...THREEKIT_QUERY_KEYS.all, 'configuration', configurationId] as const;
     },
 };
 ```
@@ -422,21 +422,23 @@ QueryClientProvider
 
 After the Threekit player loads (`useThreekitInitStatus` returns `true`), `useThreekitInit` runs automatically inside `<Player />`:
 
-1. Checks for `?shortId=` in the URL;
-2. If found — fetches the saved configuration and applies it to the player;
-3. If not found — reads initial attributes directly from `window.threekit.configurator`;
-4. Populates the Zustand store with the attributes;
-5. Sets `isLoaded = true` so the form renders.
+1. Reads display attributes from `window.threekit.configurator`;
+2. Populates the Zustand store with the attributes;
+3. Sets `isLoaded = true` so the form renders.
+
+Saved configuration restore is not handled here. Treble reads `?tkConfigId=` before player initialization, fetches the saved configuration, and passes it to Threekit as the initial configuration.
 
 ### Saved configuration
 
-To open a saved configuration, append `?shortId=<id>` to the page URL:
+To open a saved configuration, append `?tkConfigId=<id>` to the page URL:
 
 ```
-https://your-client-site.com/product-page?shortId=EXIPiBA56
+https://your-client-site.com/product-page?tkConfigId=EXIPiBA56
 ```
 
-The template will automatically detect this, fetch the configuration from Threekit, apply it to the player, and populate the store.
+`@threekit-tools/treble` detects this parameter before creating the player, fetches the saved configuration, and starts the player with that configuration. After the player is loaded, `useThreekitInit` only syncs the resulting display attributes into the local Zustand store.
+
+`getSavedConfiguration(configurationId)` is still available in `src/services/threekit/api.ts` if a project needs to read saved configuration data manually, for example custom `metadata` fields. Do not use it for post-load attribute restore.
 
 ### Reading attributes reactively
 
@@ -518,7 +520,7 @@ Add a mount div and load the embed script on the client's page:
 <script src="https://your-cdn.com/threekit-embed.js"></script>
 ```
 
-To open a saved configuration, append `?shortId=<id>` to the page URL.
+To open a saved configuration, append `?tkConfigId=<id>` to the page URL.
 
 ---
 
