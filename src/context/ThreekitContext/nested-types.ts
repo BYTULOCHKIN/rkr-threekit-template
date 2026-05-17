@@ -58,6 +58,7 @@ export const parseTextLineConfiguration = (
     try {
         return JSON.parse(configuration) as TextLineConfiguration;
     } catch {
+        // eslint-disable-next-line no-console
         console.warn('[Threekit] Failed to parse TextLine configuration:', configuration);
         return null;
     }

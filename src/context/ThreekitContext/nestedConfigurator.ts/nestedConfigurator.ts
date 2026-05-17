@@ -25,11 +25,13 @@ export const readNestedDisplayAttributes = (path: NestedPath): IThreekitDisplayA
     try {
         const conf = resolveNestedConf(path);
         if (!conf) {
+            // eslint-disable-next-line no-console
             console.warn(`[Threekit] Nested conf not found at path: ${path.join(' -> ')}`);
             return [];
         }
         return conf.getDisplayAttributes();
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.warn(`[Threekit] Could not read attributes at path: ${path.join(' -> ')}`, e);
         return [];
     }
